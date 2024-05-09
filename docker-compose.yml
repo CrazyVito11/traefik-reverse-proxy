@@ -21,10 +21,15 @@ services:
       - "./tls:/tls:ro"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.entrypoints=http,https"
       - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=traefik-dashboard-auth"
+
+      # Authentication middleware
+      # It's highly recommended to not use the default!
+      - "traefik.http.middlewares.traefik-dashboard-auth.basicauth.users=traefik:$$2y$$05$$JXeup1bn5WvFjmLTbwLBdukQG5.WYucOhvdBns/HVbGt3wP8kEmNS"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

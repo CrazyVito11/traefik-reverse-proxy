@@ -1,4 +1,5 @@
 api:
+  insecure: false
   dashboard: true
 
 log:

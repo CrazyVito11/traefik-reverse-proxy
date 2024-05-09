@@ -48,15 +48,44 @@ docker-compose up -d
 ## Traefik dashboard
 If you want to see which containers are using Traefik at the moment, you can visit the Traefik dashboard.
 
+![Screenshot of the Traefik dashboard](./assets/traefik_dashboard_preview.png)
+
+
 You can visit the Traefik dashboard at [https://traefik.localhost](https://traefik.localhost).
 
-![Screenshot of the Traefik dashboard](./assets/traefik_dashboard_preview.png)
+> [!NOTE]  
+> The Traefik Dashboard requires you to log in, the default credentials are as follows:
+>
+> **Username:** `traefik`
+>
+> **Password:** `PLEASE_change_THE_default_CREDENTIALS!`
+
+> [!WARNING]  
+> It's **highly recommended** that you change the credentials inside the `traefik-dashboard-auth` middleware to something else.
+> Using the default value could lead to someone unauthorized entering the Traefik dashboard.
+
+### Change the default login credentials
+It's **highly recommended** that you change the credentials inside the `traefik-dashboard-auth` middleware to something else, so in this section we are going to explain how you can change them.
+
+Run the following command to generate the required output for Traefik. Make sure to also replace `your_username_here` with your desired username.
+```sh
+echo $(htpasswd -nB your_username_here) | sed -e s/\\$/\\$\\$/g
+```
+
+The command will then ask for a password, enter your desired password and then you should receive a string that looks something like this:
+```
+your_username_here:$$2y$$05$$KlVS5bAXb8TL5h.vzzUMxOiOKWB6fA67zakKSY5y3oRWqBfGwD3Zu
+```
+
+Now change the `users` list of the `traefik-dashboard-auth` middleware that's located in the `docker-compose.yml` file.
+
+Once you have done that, restart the container and you should now be able to log in with your new credentials.
 
 
 ## Forward non-Docker requests to upstream server
 If the container is unable to find any Docker containers that matches the incoming request, it will forward the HTTP request to the host machine on port `81`.
 
-This allows you to for example use an Apache website running on the host machine as well as Docker applications on the same server on the same port.
+This allows you to for example use an Apache website running on the host machine as well as Docker applications on the same server, without forcing the user to manually specify the Apache port.
 
 Traefik will automatically upgrade the request of the user to HTTPS using the `traefik_wildcard` certificate and key stored in the `tls` directory. You generated these certificates during the setup process of this container.
 
