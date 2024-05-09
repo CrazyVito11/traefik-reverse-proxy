@@ -8,21 +8,25 @@ services:
     ports:
       - "127.0.0.1:80:80"
       - "127.0.0.1:443:443"
+
+      # Or use your IP address if you want to expose it on the network as well
+      # Please note that you will not be able to use ".localhost" as your top level domain in this case
+      # Use a top level domain like ".test" and then also configure a DNS server to point the domain to your IP address
+      # - "192.168.0.123:80:80"
+      # - "192.168.0.123:443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - ./traefik.yml:/traefik.yml:ro
+      - ./traefik-dynamic.yml:/traefik-dynamic.yml:ro
+      - "./tls:/tls:ro"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=https"
       - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.service=api@internal"
-      # Global redirect to https
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=http"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-      # Middleware redirect
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   default:

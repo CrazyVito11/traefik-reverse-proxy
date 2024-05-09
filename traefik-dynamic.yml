@@ -1,0 +1,36 @@
+http:
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+
+  routers:
+    host-http-fallback-route:
+      rule: "HostRegexp(`{host:.+}`)"
+      entryPoints:
+        - http
+      middlewares:
+        - redirect-to-https
+      service: host-http-fallback-service
+      priority: -999
+    host-https-fallback-route:
+      rule: "HostRegexp(`{host:.+}`)"
+      tls: {}
+      entryPoints:
+        - https
+      service: host-http-fallback-service
+      priority: -999
+
+  services:
+    host-http-fallback-service:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://host.docker.internal:81"
+
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /tls/certificates/traefik_wildcard.crt
+        keyFile: /tls/keys/traefik_wildcard.key
