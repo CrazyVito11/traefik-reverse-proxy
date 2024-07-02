@@ -32,8 +32,24 @@ services:
       - "traefik.http.middlewares.traefik-dashboard-auth.basicauth.users=traefik:$$2y$$05$$JXeup1bn5WvFjmLTbwLBdukQG5.WYucOhvdBns/HVbGt3wP8kEmNS"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - traefik-reverse-proxy
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    container_name: "jaeger"
+    networks:
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-reverse-proxy"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.localhost`)"
+      - "traefik.http.routers.jaeger.entrypoints=https"
+      - "traefik.http.routers.jaeger.tls=true"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
 
 networks:
-  default:
+  traefik-reverse-proxy:
     name: traefik-reverse-proxy
     external: true
