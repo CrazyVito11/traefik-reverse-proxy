@@ -1,2 +1,6 @@
+# Environment credentials
+.env
+
+# TLS certificates
 tls/certificates/*.crt
 tls/keys/*.key

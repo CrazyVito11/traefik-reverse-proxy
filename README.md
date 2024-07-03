@@ -12,12 +12,19 @@ You can do this with the following command:
 docker network create traefik-reverse-proxy
 ```
 
+### Configure the environment file
+Configuring the basicauth credentials, IP binding and more are all configured using the `.env` file.
+
+In order to get started, make a copy of `.env.example` and call it `.env`.
+
+The default credentials should be fine for a development setup, but might need to be adjusted for non-development environments.
+
 ### Generate a TLS certificate
 We will generate a certificate in order to allow HTTPS requests on our development environment.
 The certificate will be a wildcard certificate, this is done so that all your development applications can use this certificate.
 
 Depending on your preference, you can select between `localhost`, `dev` and `test` as the top level domain.
-```
+```sh
 cd tls
 
 # If you want to use .localhost, run
@@ -33,7 +40,7 @@ cd tls
 > [!IMPORTANT]  
 > We assume that you use the ".localhost" top level domain in this container.
 >
-> If you use something else, you will also have to update the router rule inside the `docker-compose.yml` file of this repository and all the project that you are hosting.
+> If you use something else, you will also have to update the domains inside the `.env` file of this repository and all the project that you are hosting.
 
 
 ### Start the container
@@ -61,11 +68,31 @@ You can visit the Traefik dashboard at [https://traefik.localhost](https://traef
 > **Password:** `PLEASE_change_THE_default_CREDENTIALS!`
 
 > [!WARNING]  
-> It's **highly recommended** that you change the credentials inside the `traefik-dashboard-auth` middleware to something else.
+> It's **highly recommended** that you change the credentials to something else.
 > Using the default value could lead to someone unauthorized entering the Traefik dashboard.
 
-### Change the default login credentials
-It's **highly recommended** that you change the credentials inside the `traefik-dashboard-auth` middleware to something else, so in this section we are going to explain how you can change them.
+## Jaeger UI
+[Jaeger](https://www.jaegertracing.io) is also available in order to monitor and troubleshoot requests that are made to your services.
+
+![Screenshot of the Jaeger UI](./assets/jaeger_ui_preview.png)
+
+
+You can visit the Jaeger UI at [https://jaeger.localhost](https://jaeger.localhost).
+
+> [!NOTE]  
+> The Jaeger UI requires you to log in, the default credentials are as follows:
+>
+> **Username:** `jaeger`
+>
+> **Password:** `PLEASE_change_THE_default_CREDENTIALS!`
+
+> [!WARNING]  
+> It's **highly recommended** that you change the credentials to something else.
+> Using the default value could lead to someone unauthorized entering the Jaeger UI.
+
+
+## Change the default credentials
+It's **highly recommended** that you change the default credentials to something else, so in this section we are going to explain how you can change them.
 
 Run the following command to generate the required output for Traefik. Make sure to also replace `your_username_here` with your desired username.
 ```sh
@@ -77,7 +104,7 @@ The command will then ask for a password, enter your desired password and then y
 your_username_here:$$2y$$05$$KlVS5bAXb8TL5h.vzzUMxOiOKWB6fA67zakKSY5y3oRWqBfGwD3Zu
 ```
 
-Now change the `users` list of the `traefik-dashboard-auth` middleware that's located in the `docker-compose.yml` file.
+Now update your `TRAEFIK_DASHBOARD_BASICAUTH_USERS` and/or `JAEGER_UI_BASICAUTH_USERS` variables in the `.env` file.
 
 Once you have done that, restart the container and you should now be able to log in with your new credentials.
 
@@ -115,3 +142,7 @@ This is because ports below 1024 are considered "privileged" on Linux and requir
 Using the system/default Docker engine should resolve the issue.
 ![Screenshot of the option you have to click in the Docker Desktop interface](./assets/docker_desktop_change_docker_engine.png)
 
+### Traefik dashboard / Jaeger UI don't accept my credentials
+If you try to access the Traefik dashboard or Jaeger UI, and it doesn't accept any credentials, then make sure that the `.env` has been configured properly.
+
+The credentials they use are configured in the `.env`, and if they aren't set, Traefik will not accept any entered credentials.
