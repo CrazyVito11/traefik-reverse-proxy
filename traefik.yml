@@ -17,6 +17,13 @@ entryPoints:
   https:
     address: ":443"
 
+tracing:
+  jaeger:
+    samplingParam: 1.0
+    samplingServerURL: "http://jaeger:5778/sampling"
+    samplingType: "const"
+    localAgentHostPort: "jaeger:6831"
+
 providers:
   file:
     filename: /traefik-dynamic.yml

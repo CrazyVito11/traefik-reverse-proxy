@@ -6,34 +6,50 @@ services:
     container_name: "traefik"
     restart: unless-stopped
     ports:
-      - "127.0.0.1:80:80"
-      - "127.0.0.1:443:443"
-
-      # Or use your IP address if you want to expose it on the network as well
-      # Please note that you will not be able to use ".localhost" as your top level domain in this case
-      # Use a top level domain like ".test" and then also configure a DNS server to point the domain to your IP address
-      # - "192.168.0.123:80:80"
-      # - "192.168.0.123:443:443"
+      - "${TRAEFIK_IP_BINDING:-127.0.0.1}:80:80"
+      - "${TRAEFIK_IP_BINDING:-127.0.0.1}:443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - ./traefik.yml:/traefik.yml:ro
-      - ./traefik-dynamic.yml:/traefik-dynamic.yml:ro
+      - "./traefik.yml:/traefik.yml:ro"
+      - "./traefik-dynamic.yml:/traefik-dynamic.yml:ro"
       - "./tls:/tls:ro"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http,https"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_DASHBOARD_DOMAIN:-traefik.localhost}`)"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.middlewares=traefik-dashboard-auth"
 
       # Authentication middleware
-      # It's highly recommended to not use the default!
-      - "traefik.http.middlewares.traefik-dashboard-auth.basicauth.users=traefik:$$2y$$05$$JXeup1bn5WvFjmLTbwLBdukQG5.WYucOhvdBns/HVbGt3wP8kEmNS"
+      # Comment the next line if you don't want any authentication (not recommended)
+      - "traefik.http.middlewares.traefik-dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_BASICAUTH_USERS}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - traefik-reverse-proxy
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    container_name: "jaeger"
+    restart: unless-stopped
+    networks:
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-reverse-proxy"
+      - "traefik.http.routers.jaeger.rule=Host(`${JAEGER_UI_DOMAIN:-jaeger.localhost}`)"
+      - "traefik.http.routers.jaeger.entrypoints=http,https"
+      - "traefik.http.routers.jaeger.tls=true"
+      - "traefik.http.routers.jaeger.middlewares=jaeger-ui-auth"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+
+      # Authentication middleware
+      # Comment the next line if you don't want any authentication (not recommended)
+      - "traefik.http.middlewares.jaeger-ui-auth.basicauth.users=${JAEGER_UI_BASICAUTH_USERS}"
 
 networks:
-  default:
+  traefik-reverse-proxy:
     name: traefik-reverse-proxy
     external: true
