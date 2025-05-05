@@ -146,3 +146,14 @@ Using the system/default Docker engine should resolve the issue.
 If you try to access the Traefik dashboard or Jaeger UI, and it doesn't accept any credentials, then make sure that the `.env` has been configured properly.
 
 The credentials they use are configured in the `.env`, and if they aren't set, Traefik will not accept any entered credentials.
+
+### For very long requests I'm getting a "Bad Gateway" error
+This is most likely because the request is taking too long.
+
+The container has been configured to wait for **3 hours** before terminating the connection.
+This limit should be enough for very large uploads, while preventing requests from hanging permanently.
+
+> [!NOTE]
+> It's recommended to set configure the timeout in your own application to something more reasonable.
+>
+> Sadly Traefik doesn't support setting a timeout per service yet, see [GitHub issue](https://github.com/traefik/traefik/issues/10962).

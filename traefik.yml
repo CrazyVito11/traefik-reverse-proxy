@@ -14,8 +14,18 @@ accessLog:
 entryPoints:
   http:
     address: ":80"
+    transport:
+      respondingTimeouts:
+        readTimeout: 3h
+        writeTimeout: 0
+        idleTimeout: 180s
   https:
     address: ":443"
+    transport:
+      respondingTimeouts:
+        readTimeout: 3h
+        writeTimeout: 0
+        idleTimeout: 180s
 
 tracing:
   jaeger:
