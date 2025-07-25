@@ -6,7 +6,7 @@ http:
 
   routers:
     host-http-fallback-route:
-      rule: "HostRegexp(`{host:.+}`)"
+      rule: "HostRegexp(`.+`)"
       entryPoints:
         - http
       middlewares:
@@ -14,7 +14,7 @@ http:
       service: host-http-fallback-service
       priority: -999
     host-https-fallback-route:
-      rule: "HostRegexp(`{host:.+}`)"
+      rule: "HostRegexp(`.+`)"
       tls: {}
       entryPoints:
         - https

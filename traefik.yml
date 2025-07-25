@@ -28,11 +28,11 @@ entryPoints:
         idleTimeout: 180s
 
 tracing:
-  jaeger:
-    samplingParam: 1.0
-    samplingServerURL: "http://jaeger:5778/sampling"
-    samplingType: "const"
-    localAgentHostPort: "jaeger:6831"
+  serviceName: "traefik"
+  otlp:
+    grpc:
+      endpoint: "jaeger:4317"
+      insecure: true
 
 providers:
   file:
